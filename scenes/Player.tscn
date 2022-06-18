@@ -1,0 +1,242 @@
+[gd_scene load_steps=34 format=2]
+
+[ext_resource path="res://assets/luigi_sprite.png" type="Texture" id=1]
+[ext_resource path="res://scripts/Player.gd" type="Script" id=2]
+
+[sub_resource type="Animation" id=2]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:region_rect")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Rect2( 8, 37, 16, 38 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath(".:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 531, 445 ) ]
+}
+
+[sub_resource type="Animation" id=4]
+resource_name = "attack"
+length = 0.6
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:region_rect")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ Rect2( 243, 862, 36, 51 ), Rect2( 284, 856, 34, 56 ), Rect2( 323, 856, 44, 56 ), Rect2( 372, 856, 46, 56 ), Rect2( 423, 870, 45, 44 ), Rect2( 473, 880, 42, 36 ) ]
+}
+
+[sub_resource type="Animation" id=14]
+resource_name = "attack_fail"
+length = 0.6
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:region_rect")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.4, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ Rect2( 8, 647, 39, 56 ), Rect2( 52, 665, 52, 37 ), Rect2( 109, 664, 58, 37 ), Rect2( 298, 649, 55, 51 ), Rect2( 362, 664, 42, 39 ) ]
+}
+
+[sub_resource type="Animation" id=5]
+resource_name = "attack_prep"
+length = 0.6
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:region_rect")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ Rect2( 8, 878, 25, 43 ), Rect2( 38, 878, 28, 42 ), Rect2( 71, 878, 32, 36 ), Rect2( 108, 878, 36, 35 ), Rect2( 149, 878, 42, 35 ), Rect2( 196, 879, 42, 34 ) ]
+}
+
+[sub_resource type="Animation" id=13]
+resource_name = "attack_prep_fail"
+length = 0.4
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:region_rect")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ Rect2( 8, 133, 19, 30 ), Rect2( 42, 134, 23, 30 ), Rect2( 80, 141, 24, 30 ), Rect2( 109, 141, 27, 30 ) ]
+}
+
+[sub_resource type="Animation" id=3]
+resource_name = "idle"
+length = 1.1
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:region_rect")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ Rect2( 8, 37, 16, 38 ), Rect2( 29, 38, 15, 37 ), Rect2( 49, 39, 15, 36 ), Rect2( 69, 39, 15, 36 ), Rect2( 89, 39, 15, 36 ), Rect2( 109, 38, 15, 37 ), Rect2( 129, 37, 16, 38 ), Rect2( 150, 38, 15, 37 ), Rect2( 170, 39, 15, 36 ), Rect2( 190, 39, 15, 36 ), Rect2( 210, 39, 15, 36 ), Rect2( 230, 38, 15, 37 ) ]
+}
+
+[sub_resource type="AnimationNodeAnimation" id=24]
+animation = "attack"
+
+[sub_resource type="AnimationNodeTimeScale" id=25]
+
+[sub_resource type="AnimationNodeBlendTree" id=26]
+nodes/Animation/node = SubResource( 24 )
+nodes/Animation/position = Vector2( 240, 120 )
+nodes/TimeScale/node = SubResource( 25 )
+nodes/TimeScale/position = Vector2( 480, 120 )
+nodes/output/position = Vector2( 720, 160 )
+node_connections = [ "output", 0, "TimeScale", "TimeScale", 0, "Animation" ]
+
+[sub_resource type="AnimationNodeAnimation" id=27]
+animation = "attack_fail"
+
+[sub_resource type="AnimationNodeTimeScale" id=28]
+
+[sub_resource type="AnimationNodeBlendTree" id=29]
+nodes/Animation/node = SubResource( 27 )
+nodes/Animation/position = Vector2( 180, 120 )
+nodes/TimeScale/node = SubResource( 28 )
+nodes/TimeScale/position = Vector2( 443, 190 )
+nodes/output/position = Vector2( 660, 160 )
+node_connections = [ "output", 0, "TimeScale", "TimeScale", 0, "Animation" ]
+
+[sub_resource type="AnimationNodeAnimation" id=30]
+animation = "attack_prep"
+
+[sub_resource type="AnimationNodeTimeScale" id=31]
+
+[sub_resource type="AnimationNodeBlendTree" id=32]
+nodes/Animation/node = SubResource( 30 )
+nodes/Animation/position = Vector2( 165, 142 )
+nodes/TimeScale/node = SubResource( 31 )
+nodes/TimeScale/position = Vector2( 447, 158 )
+nodes/output/position = Vector2( 700, 140 )
+node_connections = [ "output", 0, "TimeScale", "TimeScale", 0, "Animation" ]
+
+[sub_resource type="AnimationNodeAnimation" id=33]
+animation = "attack_prep_fail"
+
+[sub_resource type="AnimationNodeTimeScale" id=34]
+
+[sub_resource type="AnimationNodeBlendTree" id=35]
+nodes/Animation/node = SubResource( 33 )
+nodes/Animation/position = Vector2( 193, 175 )
+nodes/TimeScale/node = SubResource( 34 )
+nodes/TimeScale/position = Vector2( 531, 153 )
+nodes/output/position = Vector2( 800, 160 )
+node_connections = [ "output", 0, "TimeScale", "TimeScale", 0, "Animation" ]
+
+[sub_resource type="AnimationNodeAnimation" id=36]
+animation = "idle"
+
+[sub_resource type="AnimationNodeTimeScale" id=37]
+
+[sub_resource type="AnimationNodeBlendTree" id=38]
+graph_offset = Vector2( 0, 87.7833 )
+nodes/Animation/node = SubResource( 36 )
+nodes/Animation/position = Vector2( 217, 156 )
+nodes/TimeScale/node = SubResource( 37 )
+nodes/TimeScale/position = Vector2( 491, 208 )
+nodes/output/position = Vector2( 740, 140 )
+node_connections = [ "output", 0, "TimeScale", "TimeScale", 0, "Animation" ]
+
+[sub_resource type="AnimationNodeStateMachineTransition" id=39]
+switch_mode = 2
+auto_advance = true
+
+[sub_resource type="AnimationNodeStateMachineTransition" id=40]
+
+[sub_resource type="AnimationNodeStateMachineTransition" id=41]
+
+[sub_resource type="AnimationNodeStateMachineTransition" id=42]
+
+[sub_resource type="AnimationNodeStateMachineTransition" id=43]
+
+[sub_resource type="AnimationNodeStateMachineTransition" id=44]
+switch_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id=45]
+
+[sub_resource type="AnimationNodeStateMachineTransition" id=46]
+switch_mode = 2
+
+[sub_resource type="AnimationNodeStateMachine" id=10]
+states/attack/node = SubResource( 26 )
+states/attack/position = Vector2( 250, 105 )
+states/attack_fail/node = SubResource( 29 )
+states/attack_fail/position = Vector2( 595, 273.233 )
+states/attack_prep/node = SubResource( 32 )
+states/attack_prep/position = Vector2( 250, 273.233 )
+states/attack_prep_fail/node = SubResource( 35 )
+states/attack_prep_fail/position = Vector2( 898, 105 )
+states/idle/node = SubResource( 38 )
+states/idle/position = Vector2( 595, 105 )
+transitions = [ "attack", "idle", SubResource( 39 ), "attack_prep", "attack", SubResource( 40 ), "idle", "attack_prep", SubResource( 41 ), "idle", "attack", SubResource( 42 ), "idle", "attack_prep_fail", SubResource( 43 ), "attack_prep_fail", "idle", SubResource( 44 ), "attack_prep", "attack_fail", SubResource( 45 ), "attack_fail", "idle", SubResource( 46 ) ]
+start_node = "idle"
+graph_offset = Vector2( 0, 8.23318 )
+
+[sub_resource type="AnimationNodeStateMachinePlayback" id=11]
+
+[node name="Sprite2" type="Sprite"]
+position = Vector2( 531, 445 )
+texture = ExtResource( 1 )
+region_enabled = true
+region_rect = Rect2( 8, 37, 16, 38 )
+script = ExtResource( 2 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/RESET = SubResource( 2 )
+anims/attack = SubResource( 4 )
+anims/attack_fail = SubResource( 14 )
+anims/attack_prep = SubResource( 5 )
+anims/attack_prep_fail = SubResource( 13 )
+anims/idle = SubResource( 3 )
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+tree_root = SubResource( 10 )
+anim_player = NodePath("../AnimationPlayer")
+active = true
+parameters/playback = SubResource( 11 )
+parameters/attack/TimeScale/scale = 1.0
+parameters/attack_fail/TimeScale/scale = 1.0
+parameters/attack_prep/TimeScale/scale = 1.0
+parameters/attack_prep_fail/TimeScale/scale = 1.0
+parameters/idle/TimeScale/scale = 1.0

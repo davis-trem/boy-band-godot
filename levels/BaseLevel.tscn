@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://addons/midi/MidiPlayer.gd" type="Script" id=1]
+[ext_resource path="res://scripts/BaseLevel.gd" type="Script" id=2]
+[ext_resource path="res://scenes/Player.tscn" type="PackedScene" id=3]
+[ext_resource path="res://assets/bg.png" type="Texture" id=4]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource( 2 )
+file_uri = "res://midi/stickerbush_symphony.mid"
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+
+[node name="GodotMIDIPlayer" type="Node" parent="AudioStreamPlayer"]
+script = ExtResource( 1 )
+file = "res://midi/stickerbush_symphony_w_beats.mid"
+soundfont = "res://midi/gm.sf2"
+
+[node name="Sprite" type="Sprite" parent="."]
+position = Vector2( 513, 302.75 )
+scale = Vector2( 2.62887, 2.33922 )
+texture = ExtResource( 4 )
+
+[node name="Player" parent="." instance=ExtResource( 3 )]
+scale = Vector2( 3.5, 3.5 )
+
+[connection signal="midi_event" from="AudioStreamPlayer/GodotMIDIPlayer" to="." method="_on_GodotMIDIPlayer_midi_event"]
