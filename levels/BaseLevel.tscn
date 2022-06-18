@@ -24,4 +24,5 @@ texture = ExtResource( 4 )
 [node name="Player" parent="." instance=ExtResource( 3 )]
 scale = Vector2( 3.5, 3.5 )
 
+[connection signal="eigth_beat_event" from="." to="Player" method="_on_eigth_beat_event"]
 [connection signal="midi_event" from="AudioStreamPlayer/GodotMIDIPlayer" to="." method="_on_GodotMIDIPlayer_midi_event"]

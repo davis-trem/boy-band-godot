@@ -52,3 +52,16 @@ func _unhandled_key_input(event):
 					"parameters/attack2/TimeScale/scale",
 					3 / ani_player.get_animation("attack").length
 				)
+
+
+func _on_eigth_beat_event(beat):
+	var animation_state_mode: AnimationNodeStateMachinePlayback = (
+		animation_tree.get("parameters/playback")
+	)
+	if beat.measure == 1 and beat.beat == 1 and beat.eighth == 1:
+		var beat_in_sec = 60 / beat.tempo
+		animation_tree.set(
+			"parameters/idle/TimeScale/scale",
+			(beat_in_sec * 4) / ani_player.get_animation("idle").length
+		)
+		animation_state_mode.start("idle")

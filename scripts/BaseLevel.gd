@@ -8,12 +8,9 @@ export(String, FILE, '*.mid') var file_uri: String = '' setget set_file_name
 signal eigth_beat_event(beat)
 
 onready var midiPlayer = $AudioStreamPlayer/GodotMIDIPlayer
-var beat = {'measure': 1, 'beat': 1, 'eighth':1}
+var beat = {'measure': 1, 'beat': 1, 'eighth':1, 'tempo': 0}
 
 const EDITED_MIDI_DIR = 'res://midi/edited/'
-
-onready var player_ani_tree = $Player/AnimationTree
-onready var player_ani_player = $Player/AnimationPlayer
 
 
 func set_file_name(path: String):
@@ -30,36 +27,12 @@ func set_file_name(path: String):
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	print('yeeer')
-	print('tempo: {tempo}'.format({ 'tempo': midiPlayer.tempo }))
-	
 	midiPlayer.file = file_uri
-	var smf_data = SMF.new().read_file(file_uri)
-	print(smf_data.tracks[smf_data.track_count - 1].events[0].time)
-	print(smf_data.tracks[smf_data.track_count - 1].events[0].event.args)
-	print(smf_data.tracks[smf_data.track_count - 1].events[1].time)
-	print(smf_data.tracks[smf_data.track_count - 1].events[1].event.args)
-	print(smf_data.tracks[smf_data.track_count - 1].events[2].time)
-	print(smf_data.tracks[smf_data.track_count - 1].events[2].event.args)
-	
-	var animation_state_mode: AnimationNodeStateMachinePlayback = (
-		player_ani_tree.get("parameters/playback")
-	)
-	player_ani_tree.set(
-		"parameters/idle/TimeScale/scale",
-		player_ani_player.get_animation("idle").length / (60 / midiPlayer.tempo)
-	)
-	animation_state_mode.stop()
-	
 	midiPlayer.play()
-	
 	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-#	print(midiPlayer.position)
-#	pass
-#	print((midiPlayer.position / midiPlayer.last_position) * 100)
 	pass
 
 
@@ -80,8 +53,7 @@ func _create_midi_file_with_beat_events(midi_file_uri: String) -> String:
 				time_signatures.append(event_chunk)
 				
 	time_signatures.sort_custom(SMF.TrackEventSorter, 'sort')
-	print(time_signatures)
-	print(max_time)
+
 	var ts_index = 0
 	
 	var midi_file = File.new()
@@ -96,12 +68,6 @@ func _create_midi_file_with_beat_events(midi_file_uri: String) -> String:
 	
 	var track_chunk_type = [0x4D, 0x54, 0x72, 0x6B] # MTrk
 	var track_len = file_buffer.subarray(18, 21)
-	print(header_chunk)
-	print(track_chunk_type)
-	
-	print(enote_event)
-	print(enote_event.slice(1, -1))
-	print(_int_to_byte_array(1000, 4))
 	
 	var enote_event_sequence = []
 	# start first event at tick 0
@@ -188,9 +154,9 @@ func _on_GodotMIDIPlayer_midi_event(
 				event.args.type == SMF.MIDISystemEventType.text_event
 				and event.args.text == '8th'
 			):
+				beat.tempo = midiPlayer.tempo
 				self.emit_signal('eigth_beat_event', beat)
-				print('channel: {0}, event: {1}, beat: {2}'.format([channel.number, eventString, beat]))
-#				print(event.args)
+
 				beat.eighth += 1
 				if beat.eighth > 2:
 					beat.eighth = 1
@@ -199,12 +165,3 @@ func _on_GodotMIDIPlayer_midi_event(
 					beat.beat = 1
 					beat.measure += 1
 
-				var animation_state_mode: AnimationNodeStateMachinePlayback = (
-					player_ani_tree.get("parameters/playback")
-				)
-				if not animation_state_mode.is_playing():
-#					pass
-					animation_state_mode.start("idle")
-				
-				pass
-#	print('channel: {0}, event: {1}'.format([channel.number, eventString]))
