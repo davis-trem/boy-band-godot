@@ -3,21 +3,21 @@ extends Sprite
 
 onready var ani_player = $AnimationPlayer
 onready var animation_tree = $AnimationTree
+onready var animation_state_mode: AnimationNodeStateMachinePlayback = (
+	animation_tree.get("parameters/playback")
+)
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+#	for animation in ani_player.get_animation_list():
+#			if animation == "RESET":
+#				continue
+#			print("rr {0}" % [animation])
 	pass # Replace with function body.
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
-
 func _unhandled_key_input(event):
-	var animation_state_mode: AnimationNodeStateMachinePlayback = (
-		animation_tree.get("parameters/playback")
-	)
 	if event is InputEventKey:
 		if event.pressed:
 			if event.scancode == KEY_A:
@@ -54,14 +54,24 @@ func _unhandled_key_input(event):
 				)
 
 
-func _on_eigth_beat_event(beat):
-	var animation_state_mode: AnimationNodeStateMachinePlayback = (
-		animation_tree.get("parameters/playback")
+func _set_length_of_animation(animation: String, animation_length: float):
+	animation_tree.set(
+		"parameters/" + animation + "/TimeScale/scale",
+		animation_length / ani_player.get_animation(animation).length
 	)
+
+
+func _on_eigth_beat_event(beat):
 	if beat.measure == 1 and beat.beat == 1 and beat.eighth == 1:
-		var beat_in_sec = 60 / beat.tempo
-		animation_tree.set(
-			"parameters/idle/TimeScale/scale",
-			(beat_in_sec * 4) / ani_player.get_animation("idle").length
-		)
+		var beat_in_sec = float(60 / beat.tempo)
+		for animation in ani_player.get_animation_list():
+			if animation == "RESET":
+				continue
+			_set_length_of_animation(animation, beat_in_sec)
+
+		_set_length_of_animation("idle", beat_in_sec * 4)
 		animation_state_mode.start("idle")
+
+
+func _on_character_button_pressed():
+	animation_state_mode.travel("attack_prep")

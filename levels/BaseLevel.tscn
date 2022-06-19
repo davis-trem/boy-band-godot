@@ -5,7 +5,7 @@
 [ext_resource path="res://scenes/Player.tscn" type="PackedScene" id=3]
 [ext_resource path="res://assets/bg.png" type="Texture" id=4]
 
-[node name="Node2D" type="Node2D"]
+[node name="BaseLevel" type="Node2D"]
 script = ExtResource( 2 )
 file_uri = "res://midi/stickerbush_symphony.mid"
 
@@ -17,12 +17,42 @@ file = "res://midi/stickerbush_symphony_w_beats.mid"
 soundfont = "res://midi/gm.sf2"
 
 [node name="Sprite" type="Sprite" parent="."]
-position = Vector2( 513, 302.75 )
+position = Vector2( 510, 298 )
 scale = Vector2( 2.62887, 2.33922 )
 texture = ExtResource( 4 )
 
 [node name="Player" parent="." instance=ExtResource( 3 )]
+visible = false
 scale = Vector2( 3.5, 3.5 )
+
+[node name="PlayerButtonContainer" type="GridContainer" parent="."]
+margin_left = 41.0
+margin_top = 538.0
+margin_right = 131.0
+margin_bottom = 628.0
+rect_rotation = -112.5
+custom_constants/vseparation = 50
+custom_constants/hseparation = 50
+columns = 2
+
+[node name="OpponentButtonContainer" type="GridContainer" parent="."]
+margin_left = 929.0
+margin_top = 538.0
+margin_right = 1019.0
+margin_bottom = 628.0
+rect_rotation = 112.5
+rect_scale = Vector2( -1, 1 )
+custom_constants/vseparation = 50
+custom_constants/hseparation = 50
+columns = 2
+
+[node name="CharacterFields" type="YSort" parent="."]
+
+[node name="PlayerField" type="YSort" parent="CharacterFields"]
+position = Vector2( 250, 500 )
+
+[node name="OpponentField" type="YSort" parent="CharacterFields"]
+position = Vector2( 774, 500 )
 
 [connection signal="eigth_beat_event" from="." to="Player" method="_on_eigth_beat_event"]
 [connection signal="midi_event" from="AudioStreamPlayer/GodotMIDIPlayer" to="." method="_on_GodotMIDIPlayer_midi_event"]

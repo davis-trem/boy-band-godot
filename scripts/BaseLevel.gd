@@ -2,38 +2,86 @@ extends Node2D
 
 const SMF = preload('res://addons/midi/SMF.gd')
 const MP = preload('res://addons/midi/MidiPlayer.gd')
+const CharaterScene = preload('res://scenes/Player.tscn')
+const CharaterButtonScene = preload('res://scenes/CharacterButton.tscn')
 
 export(String, FILE, '*.mid') var file_uri: String = '' setget set_file_name
 
 signal eigth_beat_event(beat)
 
 onready var midiPlayer = $AudioStreamPlayer/GodotMIDIPlayer
+onready var playerButtonContainer = $PlayerButtonContainer
+onready var opponentButtonContainer = $OpponentButtonContainer
+onready var playerField = $CharacterFields/PlayerField
+onready var opponentField = $CharacterFields/OpponentField
+
 var beat = {'measure': 1, 'beat': 1, 'eighth':1, 'tempo': 0}
 
 const EDITED_MIDI_DIR = 'res://midi/edited/'
 
 
 func set_file_name(path: String):
-#	file_uri = path
 	var path_slash_split = path.split('/')
 	var file_name = path_slash_split[path_slash_split.size() - 1]
 	if !File.new().file_exists(EDITED_MIDI_DIR + file_name):
 		file_uri = _create_midi_file_with_beat_events(path)
-		print('asdfgh')
-		print(file_uri)
 	else:
 		file_uri = EDITED_MIDI_DIR + file_name
 	
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	_add_characters_and_buttons()
 	midiPlayer.file = file_uri
 	midiPlayer.play()
 	
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
+func _add_characters_and_buttons():
+	var characters = {
+		"players": [{}, {}, {}],
+		"opponents": [{}, {}, {}],
+	}
+	for player in characters.players:
+		var character = CharaterScene.instance()
+		character.scale = Vector2(3.5, 3.5)
+		
+		var control = Control.new()
+		var character_button = CharaterButtonScene.instance()
+		character_button.connect("pressed", character, "_on_character_button_pressed")
+		
+		playerField.add_child(character)
+		if playerField.get_child_count() == 1:
+			character.position = Vector2(-20, 50)
+		elif playerField.get_child_count() == 2:
+			character.position = Vector2(-100, -80)
+		elif playerField.get_child_count() == 3:
+			character.position = Vector2(100, -30)
+		
+		character_button.rect_rotation = playerButtonContainer.rect_rotation * -1
+		control.add_child(character_button)
+		playerButtonContainer.add_child(control)
+		
+	for opponent in characters.opponents:
+		var character = CharaterScene.instance()
+		character.scale = Vector2(-3.5, 3.5)
+		
+		var control = Control.new()
+		var character_button = CharaterButtonScene.instance()
+		character_button.connect("pressed", character, "_on_character_button_pressed")
+		
+		opponentField.add_child(character)
+		if opponentField.get_child_count() == 1:
+			character.position = Vector2(20, 50)
+		elif opponentField.get_child_count() == 2:
+			character.position = Vector2(100, -80)
+		elif opponentField.get_child_count() == 3:
+			character.position = Vector2(-100, -30)
+		
+		character_button.rect_scale.x = character_button.rect_scale.x * -1
+		character_button.rect_rotation = opponentButtonContainer.rect_rotation
+		control.add_child(character_button)
+		opponentButtonContainer.add_child(control)
+	
 
 
 func _create_midi_file_with_beat_events(midi_file_uri: String) -> String:

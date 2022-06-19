@@ -218,6 +218,7 @@ graph_offset = Vector2( 0, 8.23318 )
 [node name="Sprite2" type="Sprite"]
 position = Vector2( 531, 445 )
 texture = ExtResource( 1 )
+offset = Vector2( 0, -15 )
 region_enabled = true
 region_rect = Rect2( 8, 37, 16, 38 )
 script = ExtResource( 2 )
