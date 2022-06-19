@@ -4,18 +4,24 @@ const SMF = preload('res://addons/midi/SMF.gd')
 const MP = preload('res://addons/midi/MidiPlayer.gd')
 const CharaterScene = preload('res://scenes/Player.tscn')
 const CharaterButtonScene = preload('res://scenes/CharacterButton.tscn')
+const metronome_120_bpm_4_beat = preload(
+	"res://sounds/120_bpm_4_beat_metronome.mp3"
+)
 
 export(String, FILE, '*.mid') var file_uri: String = '' setget set_file_name
+export(int) var metronome_count = 2
 
 signal eigth_beat_event(beat)
 
-onready var midiPlayer = $AudioStreamPlayer/GodotMIDIPlayer
+onready var midiPlayer = $GodotMIDIPlayer
 onready var playerButtonContainer = $PlayerButtonContainer
 onready var opponentButtonContainer = $OpponentButtonContainer
 onready var playerField = $CharacterFields/PlayerField
 onready var opponentField = $CharacterFields/OpponentField
+onready var metronome = $Metronome
 
 var beat = {'measure': 1, 'beat': 1, 'eighth':1, 'tempo': 0}
+var metronome_played = 1
 
 const EDITED_MIDI_DIR = 'res://midi/edited/'
 
@@ -34,7 +40,14 @@ func _ready():
 	_add_characters_and_buttons()
 	midiPlayer.file = file_uri
 	midiPlayer.play()
+	midiPlayer.stop()
+	print(midiPlayer.tempo)
 	
+	if !metronome.playing:
+		metronome.stream = metronome_120_bpm_4_beat
+		metronome.pitch_scale = ((60 / midiPlayer.tempo) * 4) / 2
+		metronome.play()
+
 
 func _add_characters_and_buttons():
 	var characters = {
@@ -43,7 +56,9 @@ func _add_characters_and_buttons():
 	}
 	for player in characters.players:
 		var character = CharaterScene.instance()
+		character.is_player = true
 		character.scale = Vector2(3.5, 3.5)
+		connect("eigth_beat_event", character, "_on_eigth_beat_event")
 		
 		var control = Control.new()
 		var character_button = CharaterButtonScene.instance()
@@ -64,6 +79,7 @@ func _add_characters_and_buttons():
 	for opponent in characters.opponents:
 		var character = CharaterScene.instance()
 		character.scale = Vector2(-3.5, 3.5)
+		connect("eigth_beat_event", character, "_on_eigth_beat_event")
 		
 		var control = Control.new()
 		var character_button = CharaterButtonScene.instance()
@@ -212,4 +228,15 @@ func _on_GodotMIDIPlayer_midi_event(
 				if beat.beat > 4:
 					beat.beat = 1
 					beat.measure += 1
+
+
+
+func _on_Metronome_finished():
+	if metronome_count == metronome_played:
+		midiPlayer.play()
+
+	if metronome_played < metronome_count:
+		metronome_played += 1
+		metronome.play()
+
 

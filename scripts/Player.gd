@@ -1,11 +1,15 @@
 extends Sprite
 
 
+export(bool) var is_player = false
+
 onready var ani_player = $AnimationPlayer
 onready var animation_tree = $AnimationTree
 onready var animation_state_mode: AnimationNodeStateMachinePlayback = (
 	animation_tree.get("parameters/playback")
 )
+
+var chargine_attack = false
 
 
 # Called when the node enters the scene tree for the first time.
@@ -71,7 +75,30 @@ func _on_eigth_beat_event(beat):
 
 		_set_length_of_animation("idle", beat_in_sec * 4)
 		animation_state_mode.start("idle")
+	
+	# Do nothing for first 2 measures
+	if beat.measure == 1 or beat.measure == 2:
+		return
+	
+	if is_player:
+		if !chargine_attack and beat.measure % 2 == 1 and beat.beat == 1:
+			animation_state_mode.travel("attack_prep_fail")
+		
+		# If player waits too long to commit attack 
+		if chargine_attack and beat.beat == 3:
+			chargine_attack = false
+			animation_state_mode.travel("attack_fail")
+	else:
+		# handle ai attacking
+		pass
+	
+	
 
 
 func _on_character_button_pressed():
-	animation_state_mode.travel("attack_prep")
+	if is_player:
+		chargine_attack = true
+		animation_state_mode.travel("attack_prep")
+	else:
+		# handle ai being attacked
+		pass
