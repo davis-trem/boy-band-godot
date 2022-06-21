@@ -39,14 +39,21 @@ func set_file_name(path: String):
 func _ready():
 	_add_characters_and_buttons()
 	midiPlayer.file = file_uri
+	beat.tempo = _get_first_midi_tempo()
 	midiPlayer.play()
-	midiPlayer.stop()
-	print(midiPlayer.tempo)
-	
-	if !metronome.playing:
-		metronome.stream = metronome_120_bpm_4_beat
-		metronome.pitch_scale = ((60 / midiPlayer.tempo) * 4) / 2
-		metronome.play()
+
+
+# midi tempo event doesn't come quick enough so get it in advance
+func _get_first_midi_tempo():
+	var smf_data = SMF.new().read_file(file_uri)
+	for track in smf_data.tracks:
+		for event_chunk in track.events:
+			if (
+				event_chunk.event.type == SMF.MIDIEventType.system_event
+				and event_chunk.event.args.type == SMF.MIDISystemEventType.set_tempo
+			):
+				return 60000000.0 / float(event_chunk.event.args.bpm)
+	return midiPlayer.tempo
 
 
 func _add_characters_and_buttons():
@@ -214,11 +221,18 @@ func _on_GodotMIDIPlayer_midi_event(
 			eventString = 'ChannelPressure %d' % event.value
 		SMF.MIDIEventType.system_event:
 			eventString = 'SystemEvent %d' % event.args.type
+			if event.args.type == SMF.MIDISystemEventType.set_tempo:
+				beat.tempo = midiPlayer.tempo
+				# need to handle tempo changes
 			if (
 				event.args.type == SMF.MIDISystemEventType.text_event
 				and event.args.text == '8th'
 			):
-				beat.tempo = midiPlayer.tempo
+				if !metronome.playing and beat.measure == 1 and beat.beat == 1:
+					metronome.stream = metronome_120_bpm_4_beat
+					metronome.pitch_scale = float(beat.tempo / 120)
+					metronome.play()
+		
 				self.emit_signal('eigth_beat_event', beat)
 
 				beat.eighth += 1
@@ -230,11 +244,7 @@ func _on_GodotMIDIPlayer_midi_event(
 					beat.measure += 1
 
 
-
 func _on_Metronome_finished():
-	if metronome_count == metronome_played:
-		midiPlayer.play()
-
 	if metronome_played < metronome_count:
 		metronome_played += 1
 		metronome.play()

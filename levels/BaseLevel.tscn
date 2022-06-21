@@ -8,7 +8,7 @@
 script = ExtResource( 2 )
 file_uri = "res://midi/stickerbush_symphony.mid"
 
-[node name="Metronome" type="AudioStreamPlayer2D" parent="."]
+[node name="Metronome" type="AudioStreamPlayer" parent="."]
 
 [node name="GodotMIDIPlayer" type="Node" parent="."]
 script = ExtResource( 1 )
