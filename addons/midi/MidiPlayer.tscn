@@ -4,5 +4,3 @@
 
 [node name="MidiPlayer" type="Node"]
 script = ExtResource( 1 )
-file = "res://midi/fz_mute_city.mid"
-soundfont = "res://midi/gm.sf2"

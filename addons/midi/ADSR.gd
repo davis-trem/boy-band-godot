@@ -1,13 +1,13 @@
+"""
+	AudioStreamPlayer with ADSR + Linked by あるる（きのもと 結衣） @arlez80
+	
+	MIT License
+"""
+
 extends AudioStreamPlayer
 
 class_name AudioStreamPlayerADSR
-
-const Bank = preload( "Bank.gd" )
 const gap_second:float = 44100.0 / 1024.0 / 1000.0
-
-"""
-	AudioStreamPlayer with ADSR + Linked by Yui Kinomoto @arlez80
-"""
 
 # 発音チャンネル
 var channel_number:int = -1
@@ -64,12 +64,25 @@ onready var release_state:Array = [
 	# { "time": 0.2, "jump_to": 0.0 },	# not implemented
 ]
 
-func _ready( ):
+"""
+	準備
+"""
+func _ready( ) -> void:
 	self.stop( )
 
+"""
+	Linkedサウンドを使用しているか？
+
+	@return	使用している場合true
+"""
 func _check_using_linked( ) -> bool:
 	return self.instrument != null and 2 <= len( self.instrument.array_stream )
 
+"""
+	楽器を変更
+
+	@param	_instrument	楽器
+"""
 func set_instrument( _instrument:Bank.Instrument ) -> void:
 	if self.instrument == _instrument:
 		return
@@ -85,7 +98,12 @@ func set_instrument( _instrument:Bank.Instrument ) -> void:
 		self.linked_base_pitch = _instrument.array_base_pitch[1]
 		self.linked.stream = _instrument.array_stream[1]
 
-func play( from_position:float = 0.0 ):
+"""
+	再生
+
+	@param	from_position	再生位置
+"""
+func play( from_position:float = 0.0 ) -> void:
 	self.releasing = false
 	self.request_release = false
 	self.timer = 0.0
@@ -109,16 +127,27 @@ func play( from_position:float = 0.0 ):
 	self._update_adsr( 0.0 )
 	self.force_update = false
 
-func stop( ):
+"""
+	停止
+"""
+func stop( ) -> void:
 	.stop( )
 	if self.linked != null:
 		self.linked.stop( )
 	self.hold = false
 
+"""
+	リリース開始
+"""
 func start_release( ) -> void:
 	self.request_release_second = self.gap_second - AudioServer.get_time_to_next_mix( )
 	self.request_release = true
 
+"""
+	ADSR制御
+
+	@param	delta	前回からの差分秒数 sec
+"""
 func _update_adsr( delta:float ) -> void:
 	if ( not self.playing ) and ( not self.force_update ):
 		return
@@ -169,6 +198,9 @@ func _update_adsr( delta:float ) -> void:
 				self.current_volume_db = self.release_state[0].volume_db
 				self.timer = 0.0
 
+"""
+	音量を更新
+"""
 func _update_volume( ) -> void:
 	var v:float = self.current_volume_db + linear2db( float( self.velocity ) / 127.0 )# + self.instrument.volume_db
 

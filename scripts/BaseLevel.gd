@@ -45,7 +45,7 @@ func _ready():
 
 # midi tempo event doesn't come quick enough so get it in advance
 func _get_first_midi_tempo():
-	var smf_data = SMF.new().read_file(file_uri)
+	var smf_data = SMF.new().read_file(file_uri).data
 	for track in smf_data.tracks:
 		for event_chunk in track.events:
 			if (

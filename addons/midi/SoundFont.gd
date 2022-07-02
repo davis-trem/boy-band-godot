@@ -1,5 +1,7 @@
 """
-	SoundFont reader by Yui Kinomoto @arlez80
+	SoundFont reader by あるる（きのもと 結衣） @arlez80
+
+	MIT License
 """
 
 class_name SoundFont
@@ -190,39 +192,56 @@ class SoundFontSampleHeader:
 	var sample_link:int = 0
 	var sample_type:int = 0
 
+# 読み込んだ
+class SoundFontParseResult:
+	var error:int = OK
+	var data:SoundFontData = null
+
+	func _init( ):
+		pass
+
 """
 	ファイルから読み込み
-	@param	path	File path
-	@return	smf
+
+	@param	path	ファイルパス
+	@return	サウンドフォント
 """
-func read_file( path:String ) -> SoundFontData:
+func read_file( path:String ) -> SoundFontParseResult:
+	var result: = SoundFontParseResult.new( )
 	var f:File = File.new( )
 
-	if f.open( path, f.READ ) != OK:
-		push_error( "error: cant read file %s" % path )
-		breakpoint
+	var err:int = f.open( path, f.READ )
+	if err != OK:
+		result.error = err
+		return result
 	var stream:StreamPeerBuffer = StreamPeerBuffer.new( )
 	stream.set_data_array( f.get_buffer( f.get_len( ) ) )
 	stream.big_endian = false
 	f.close( )
 
-	return self._read( stream )
+	result.data = self._read( stream )
+	return result
 
 """
 	配列から読み込み
-	@param	data	PoolByteArray
-	@return	smf
+
+	@param	data	データ
+	@return	サウンドフォント
 """
-func read_data( data:PoolByteArray ) -> SoundFontData:
+func read_data( data:PoolByteArray ) -> SoundFontParseResult:
 	var stream:StreamPeerBuffer = StreamPeerBuffer.new( )
 	stream.set_data_array( data )
 	stream.big_endian = false
-	return self._read( stream )
+
+	var result: = SoundFontParseResult.new( )
+	result.data = self._read( stream )
+	return result
 
 """
 	読み込み
-	@param	input
-	@return	SoundFont
+
+	@param	input	ストリーム
+	@return	サウンドフォント
 """
 func _read( input:StreamPeerBuffer ) -> SoundFontData:
 	self._check_chunk( input, "RIFF" )
@@ -238,20 +257,22 @@ func _read( input:StreamPeerBuffer ) -> SoundFontData:
 
 """
 	チャンクチェック
-	@param	input
-	@param	hdr
+
+	@param	input	ストリーム
+	@param	hdr		ヘッダ文字列
 """
-func _check_chunk( input:StreamPeerBuffer, hdr:String ):
+func _check_chunk( input:StreamPeerBuffer, hdr:String ) -> void:
 	self._check_header( input, hdr )
 	if input.get_32( ) != 0:
 		pass
 
 """
 	ヘッダーチェック
-	@param	input
-	@param	hdr
+
+	@param	input	ストリーム
+	@param	hdr		ヘッダ文字列
 """
-func _check_header( input:StreamPeerBuffer, hdr:String ):
+func _check_header( input:StreamPeerBuffer, hdr:String ) -> void:
 	var chk = input.get_string( 4 )
 	if hdr != chk:
 		print( "Doesn't exist " + hdr + " header" )
@@ -259,17 +280,18 @@ func _check_header( input:StreamPeerBuffer, hdr:String ):
 
 """
 	チャンク読み込み
-	@param	input
-	@param	needs_header
-	@param	chunk
+
+	@param	input			ストリーム
+	@param	required_header	ヘッダ確認
+	@return	チャンク
 """
-func _read_chunk( stream:StreamPeerBuffer, needs_header = null ) -> SoundFontChunk:
+func _read_chunk( stream:StreamPeerBuffer, required_header = null ) -> SoundFontChunk:
 	var chunk:SoundFontChunk = SoundFontChunk.new( )
 
 	chunk.header = stream.get_string( 4 )
-	if needs_header != null:
-		if needs_header != chunk.header:
-			print( "Doesn't exist " + needs_header + " header" )
+	if required_header != null:
+		if required_header != chunk.header:
+			print( "Doesn't exist " + required_header + " header" )
 			breakpoint
 	chunk.size =  stream.get_u32( )
 	var new_stream:StreamPeerBuffer = StreamPeerBuffer.new( )
@@ -281,8 +303,9 @@ func _read_chunk( stream:StreamPeerBuffer, needs_header = null ) -> SoundFontChu
 
 """
 	INFOチャンクを読み込む
-	@param	stream
-	@param	chunk
+
+	@param	stream	ストリーム
+	@return	サウンドフォントのINFO
 """
 func _read_info( stream:StreamPeerBuffer ) -> SoundFontInfo:
 	var chunk:SoundFontChunk = self._read_chunk( stream, "LIST" )
@@ -323,8 +346,9 @@ func _read_info( stream:StreamPeerBuffer ) -> SoundFontInfo:
 
 """
 	バージョンタグを読み込む
-	@param	stream
-	@param	chunk
+
+	@param	ストリーム
+	@return	バージョンタグ
 """
 func _read_version_tag( stream:StreamPeerBuffer ) -> SoundFontVersionTag:
 	var vtag:SoundFontVersionTag = SoundFontVersionTag.new( )
@@ -335,8 +359,9 @@ func _read_version_tag( stream:StreamPeerBuffer ) -> SoundFontVersionTag:
 
 """
 	SDTAを読み込む
-	@param	stream
-	@param	chunk
+
+	@param	stream	ストリーム
+	@return	サンプルデータ
 """
 func _read_sdta( stream:StreamPeerBuffer ) -> SoundFontSampleData:
 	var chunk:SoundFontChunk = self._read_chunk( stream, "LIST" )
@@ -355,8 +380,9 @@ func _read_sdta( stream:StreamPeerBuffer ) -> SoundFontSampleData:
 
 """
 	PDTAを読み込む
-	@param	stream
-	@param	chunk
+
+	@param	stream	ストリーム
+	@return	プリセットデータ
 """
 func _read_pdta( stream:StreamPeerBuffer ) -> SoundFontPresetData:
 	var chunk:SoundFontChunk = self._read_chunk( stream, "LIST" )
@@ -378,8 +404,9 @@ func _read_pdta( stream:StreamPeerBuffer ) -> SoundFontPresetData:
 
 """
 	phdr 読み込み
-	@param	stream
-	@param	chunk
+
+	@param	stream	ストリーム
+	@return	プリセットヘッダーのリスト
 """
 func _read_pdta_phdr( stream:StreamPeerBuffer ) -> Array:
 	var chunk:SoundFontChunk = self._read_chunk( stream, "phdr" )
@@ -404,8 +431,9 @@ func _read_pdta_phdr( stream:StreamPeerBuffer ) -> Array:
 
 """
 	*bag読み込み
-	@param	stream
-	@param	chunk
+
+	@param	stream	ストリーム
+	@return	bagデータのリスト
 """
 func _read_pdta_bag( stream:StreamPeerBuffer ) -> Array:
 	var chunk:SoundFontChunk = self._read_chunk( stream )
@@ -428,8 +456,9 @@ func _read_pdta_bag( stream:StreamPeerBuffer ) -> Array:
 
 """
 	*mod読み込み
-	@param	stream
-	@param	chunk
+
+	@param	stream	ストリーム
+	@return	modulationデータのリスト
 """
 func _read_pdta_mod( stream:StreamPeerBuffer ) -> Array:
 	var chunk:SoundFontChunk = self._read_chunk( stream )
@@ -455,8 +484,9 @@ func _read_pdta_mod( stream:StreamPeerBuffer ) -> Array:
 
 """
 	gen 読み込み
-	@param	stream
-	@param	chunk
+
+	@param	stream	ストリーム
+	@return	generatorデータのリスト
 """
 func _read_pdta_gen( stream:StreamPeerBuffer ) -> Array:
 	var chunk:SoundFontChunk = self._read_chunk( stream )
@@ -484,8 +514,9 @@ func _read_pdta_gen( stream:StreamPeerBuffer ) -> Array:
 
 """
 	inst読み込み
-	@param	stream
-	@param	chunk
+
+	@param	stream	ストリーム
+	@return	楽器データのリスト
 """
 func _read_pdta_inst( stream:StreamPeerBuffer ) -> Array:
 	var chunk:SoundFontChunk = self._read_chunk( stream, "inst" )
@@ -504,8 +535,9 @@ func _read_pdta_inst( stream:StreamPeerBuffer ) -> Array:
 
 """
 	shdr 読み込み
-	@param	stream
-	@param	chunk
+
+	@param	stream	ストリーム
+	@return	波形データのリスト
 """
 func _read_pdta_shdr( stream:StreamPeerBuffer ) -> Array:
 	var chunk:SoundFontChunk = self._read_chunk( stream, "shdr" )
